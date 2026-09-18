@@ -1,14 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>CS2 LABRATORY</title>
-</head>
+<style>
+:root{--bg:#000;--text:#f3f4f6;--muted:#8b8b8b}
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#f3f4f6;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+.refreshbar{background:#1a0505;color:#fecaca;text-align:center;font-size:11px;font-weight:800;letter-spacing:.06em;padding:6px 8px}
+.top-inner,.wrap{max-width:1280px;margin:0 auto;padding:8px 10px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand h1{margin:0;font-size:15px;letter-spacing:.12em}
+.pulse{background:#7f1d1d;color:#fecaca;border:1px solid #ef4444;border-radius:999px;padding:2px 8px;font-size:9px;font-weight:800}
+.searchbox{display:flex;background:#0c0c0c;border:1px solid #222;border-radius:8px;padding:0 6px;margin:8px 0}
+.searchbox input{flex:1;background:transparent;border:0;color:#fff;font-size:16px;padding:8px 6px;outline:0}
+.chips,.maintabs{display:flex;gap:0;overflow-x:auto}
+.mtab,.chip{background:transparent;border:0;border-bottom:2px solid transparent;color:#8b8b8b;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.mtab.on,.chip.on{color:#fff;border-bottom-color:#3b82f6}
+.note{color:#8b8b8b;font-size:12px}
+.bookbubble select{background:#0c0c0c;color:#fff;border:1px solid #2a2a2a;border-radius:999px;padding:7px 12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{position:sticky;top:0;background:#0a0a0a;color:#8b8b8b;font-size:10px;text-transform:uppercase;padding:6px 5px;text-align:left}
+td{padding:6px 5px;border-bottom:1px solid #141414}
+.play{font-weight:700}.muted{color:#8b8b8b;font-size:11px}
+.A{color:#22c55e;font-weight:800}.B{color:#86efac;font-weight:800}.C{color:#eab308;font-weight:800}.D,.F{color:#ef4444;font-weight:800}
+.btn{background:#1f1f1f;color:#fff;border:1px solid #2a2a2a;border-radius:6px;padding:6px 8px;font-size:11px;font-weight:700;cursor:pointer}
+.overlay{display:none;position:fixed;inset:0;background:#000c;z-index:30;padding:20px 10px}
+.overlay.show{display:block}
+.modal-inner{max-width:860px;margin:0 auto;background:#0a0a0a;border:1px solid #222;border-radius:10px;padding:16px}
+</style></head>
 <body>
-<div id="boot">Loading CS2 board…</div>
+<div class="refreshbar">LAST REFRESHED — Sep 17, 2026 8:33 PM CT</div>
+<div class="top-inner">
+  <div class="brand"><h1>CS2 LABRATORY</h1><span class="pulse">LIVE</span></div>
+  <div class="maintabs">
+    <button class="mtab on" data-view="props">Props</button>
+    <button class="mtab" data-view="due">Due</button>
+  </div>
+  <form class="searchbox" id="form"><input id="q" placeholder="Search player or prop"/><button class="btn" style="margin:6px;background:#3b82f6;border:0">Grade</button></form>
+  <div class="chips" id="chips"></div>
+</div>
+<div class="wrap">
+  <div class="note" style="margin:8px 0">
+    Sportsbook
+    <label class="bookbubble"><select id="book">
+      <option value="">All books</option>
+      <option value="PP">PrizePicks</option>
+      <option value="UD">Underdog</option>
+      <option value="Sleeper">Sleeper</option>
+      <option value="betr">Betr</option>
+      <option value="Chalkboard">Chalkboard</option>
+    </select></label>
+  </div>
+  <p class="note" id="status"></p>
+  <table>
+    <thead><tr><th>#</th><th>Grade</th><th>Player</th><th>Line</th><th>Last 5</th><th>Last 10</th><th>H2H</th><th>Avg</th><th>Books</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+<div class="overlay" id="overlay"><div class="modal-inner" id="modal"></div></div>
 <script src="data.js"></script>
 <script>
-if(typeof ALL==="undefined"){document.getElementById("boot").textContent="data.js failed to load";}
-else {location.replace(location.pathname+location.search+location.hash);}
+if(typeof ALL==="undefined") ALL=[];
+if(typeof MAPS==="undefined") MAPS={};
+if(typeof REFRESH==="undefined") REFRESH="";
+function bookOf(){return (document.getElementById("book")||{}).value||""}
+function bookOk(p){const b=bookOf(); if(!b) return true; return (p.books||"").split("/").some(x=>x.trim().toLowerCase()===b.toLowerCase())}
+function factor(p){
+  const parts=[p.ml||0, p.l5, p.l10, (p.h2hGames?p.h2h:null)].filter(v=>v!=null);
+  const avg=parts.length?parts.reduce((a,b)=>a+b,0)/parts.length:0;
+  let grade="F"; if(avg>=72) grade="A"; else if(avg>=62) grade="B"; else if(avg>=52) grade="C"; else if(avg>=42) grade="D";
+  p.grade=grade; return avg;
+}
+function render(list){
+  document.getElementById("rows").innerHTML=list.map((p,i)=>{
+    factor(p);
+    return `<tr>
+      <td>${i+1}</td><td class="${p.grade}">${p.grade}</td>
+      <td class="play">${p.player}<div class="muted">${p.match} · ${p.prop}</div></td>
+      <td>${p.line}</td>
+      <td>${p.l5==null?"n/a":p.l5+"%"}</td>
+      <td>${p.l10==null?"n/a":p.l10+"%"}</td>
+      <td>${p.h2hGames?p.h2h+"%":"n/a"}</td>
+      <td>${p.avg??"n/a"}</td>
+      <td>${p.books||"—"}</td></tr>`;
+  }).join("")||`<tr><td colspan="9" class="muted">No rows</td></tr>`;
+}
+function search(q){
+  q=(q||"").trim().toLowerCase();
+  let list=ALL.filter(bookOk);
+  if(q && q!=="all") list=list.filter(p=>[p.player,p.prop,p.match,p.team].join(" ").toLowerCase().includes(q) || p.prop.toLowerCase()===q);
+  if(q==="due") list=ALL.filter(bookOk).filter(p=>p.miss && (p.h2h>=50 || (!p.h2hGames && p.ml>50)));
+  document.getElementById("status").textContent=list.length+" lines · "+(REFRESH||"");
+  render(list);
+}
+document.getElementById("form").onsubmit=e=>{e.preventDefault();search(document.getElementById("q").value)};
+document.getElementById("q").oninput=e=>search(e.target.value);
+document.getElementById("book").onchange=()=>search(document.getElementById("q").value);
+["All","Maps 1-2 Kills","Maps 1-2 HS","Due"].forEach(c=>{
+  const b=document.createElement("button"); b.type="button"; b.className="chip"+(c==="All"?" on":""); b.textContent=c;
+  b.onclick=()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); document.getElementById("q").value=c==="All"?"":c; search(c);};
+  document.getElementById("chips").appendChild(b);
+});
+search("");
 </script>
 </body></html>
