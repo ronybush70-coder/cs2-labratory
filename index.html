@@ -46,7 +46,7 @@ td{padding:6px 5px;border-bottom:1px solid #141414;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style></head>
 <body>
-<div class="refreshbar">LAST REFRESHED — Sep 17, 2026 11:12 PM CT</div>
+<div class="refreshbar">LAST REFRESHED — Sep 17, 2026 11:14 PM CT</div>
 <div class="top"><div class="top-inner">
   <div class="brand"><h1>CS2 LABRATORY</h1><span class="pulse">updated every hour 2–11pm CT</span>
     <button class="slipbtn" id="slipOpen">Generate slip</button></div>
@@ -90,8 +90,8 @@ td{padding:6px 5px;border-bottom:1px solid #141414;vertical-align:middle}
 <script>
 if(typeof ALL==="undefined") ALL=[];
 if(typeof MAPS==="undefined") MAPS={};
-var BUMPS=window.__LINE_BUMPS||window.BUMPS||{};
-if(typeof REFRESH==="undefined") REFRESH="";
+var MOVES=window.__LINE_BUMPS||{};
+if(typeof REFRESH==="undefined") REFRESH=window.REFRESH||"";
 const VIEW={mode:"props"};
 function bookOf(){return document.getElementById("book").value||""}
 function bookOk(p){const b=bookOf();return !b||(p.books||"").split("/").some(x=>x.trim().toLowerCase()===b.toLowerCase())}
@@ -109,7 +109,7 @@ function sortList(list){const k=document.getElementById("statSort").value; const
 function isDue(p){const pr=project(p); if(!p.miss||pr.pOver==null||pr.pOver<55) return false; return ((p.h2hGames||0)>0&&p.h2h>=50)||((p.h2hGames||0)===0&&(p.ml||0)>50)}
 function mapCards(p){const ms=MAPS[p.player]||{}, likely=new Set(p.pool||[]); const names=Object.keys(ms).sort((a,b)=>(likely.has(b)-likely.has(a))||(ms[b].n||0)-(ms[a].n||0)); const key=metricKey(p), lab=isHS(p)?"avg HS":"avg kills"; return '<div class="mapgrid">'+names.map(m=>{const x=ms[m];return `<div class="mapcard ${likely.has(m)?"likely":""}"><b>${m}</b><br>${lab} ${x[key]} · rtg ${x.r} · ${x.n} maps</div>`}).join("")+"</div>";}
 function statsTable(p,pr){const rows=[["Grade",p.grade],["Line",p.line],["Projected",pr.n??"n/a"],["P(over)",(pr.pOver??"n/a")+"%"],["Team ML",p.ml+"%"],["Last 5",p.l5==null?"n/a":p.l5+"%"],["Last 10",p.l10==null?"n/a":p.l10+"%"],["Last 15",p.l15==null?"n/a":p.l15+"%"],["L10 avg",p.avg??"n/a"],["H2H",(p.h2hGames||0)?p.h2h+"% ("+p.h2hHits+"/"+p.h2hGames+")":"n/a"],["Last match",p.last],["Start",fmtStart(p.start)],["Books",p.books||"—"],["Likely maps",(p.pool||[]).slice(0,2).join(" + ")||"n/a"]]; return `<table class="kv"><tbody>${rows.map(([k,v])=>`<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</tbody></table>`;}
-function bumpOf(p){const k=[p.player,p.prop,p.match].join("|"); if(BUMPS[k]) return BUMPS[k]; const parts=(p.match||"").split(" vs "); if(parts.length===2){const k2=[p.player,p.prop,parts[1]+" vs "+parts[0]].join("|"); if(BUMPS[k2]) return BUMPS[k2];} return null;}
+function bumpOf(p){const k=[p.player,p.prop,p.match].join("|"); if(MOVES[k]) return MOVES[k]; const parts=(p.match||"").split(" vs "); if(parts.length===2){const k2=[p.player,p.prop,parts[1]+" vs "+parts[0]].join("|"); if(MOVES[k2]) return MOVES[k2];} return null;}
 function bumpBadge(p){const b=bumpOf(p); if(!b) return ""; if(b.new>b.old) return `<span class="bump up">BUMPED ${b.old}→${b.new}</span>`; return `<span class="bump up" style="background:#14532d;color:#bbf7d0">CUT ${b.old}→${b.new}</span>`;}
 function render(list){window.CURRENT=list; document.getElementById("rows").innerHTML=list.map((p,i)=>{const pr=project(p); factorScores(p); return `<tr><td>${i+1}</td><td class="${p.grade}">${p.grade}</td><td class="play">${p.player}<div class="muted">${p.match} · ${p.prop}</div></td><td>${p.line}${bumpBadge(p)}</td><td>${p.l5==null?"n/a":p.l5+"%"}</td><td>${p.l10==null?"n/a":p.l10+"%"}</td><td>${p.l15==null?"n/a":p.l15+"%"}</td><td>${p.avg??"n/a"}</td><td>${p.h2hGames?p.h2h+"%":"n/a"}</td><td><b>${pr.n??"n/a"}</b></td><td>${p.books||"—"}</td><td><div class="act"><button class="btn" data-act="sum" data-i="${i}">Summary</button><button class="btn sim" data-act="sim" data-i="${i}">Simulation</button><span class="muted">${fmtStart(p.start)}</span><span class="ml">${p.ml}% win</span></div></td></tr>`;}).join("")||`<tr><td colspan="12" class="muted">No rows</td></tr>`;}
 function renderMaps(){const by={}; ALL.filter(bookOk).forEach(p=>{const k=p.match||"?"; if(!by[k]) by[k]={match:k,start:p.start,pool:p.pool||[],players:[]}; by[k].players.push(p); (p.pool||[]).forEach(m=>{if(!by[k].pool.includes(m)) by[k].pool.push(m)});}); document.getElementById("mapRows").innerHTML=Object.values(by).sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(m=>{const tops=m.players.map(p=>({p,pr:project(p)})).sort((a,b)=>(b.pr.pOver||0)-(a.pr.pOver||0)).slice(0,3).map(x=>x.p.player+" "+x.p.prop+" ("+(x.pr.pOver??"—")+"%)").join(" · "); return `<tr><td class="play">${m.match}</td><td>${m.pool[0]||"TBD"}</td><td>${m.pool[1]||"TBD"}</td><td class="muted">${tops||"—"}</td><td>${fmtStart(m.start)}</td></tr>`;}).join("");}
