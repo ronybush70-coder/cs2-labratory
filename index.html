@@ -3,12 +3,131 @@
 <head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>CS2 LABRATORY</title>
-</head>
+<style>
+:root{--bg:#000;--text:#f3f4f6;--muted:#8b8b8b}
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#f3f4f6;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+.refreshbar{background:#1a0505;color:#fecaca;text-align:center;font-size:11px;font-weight:800;letter-spacing:.06em;padding:6px}
+.top{position:sticky;top:0;z-index:10;background:#000}
+.top-inner,.wrap{max-width:1280px;margin:0 auto;padding:8px 10px}
+.brand{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.brand h1{margin:0;font-size:15px;letter-spacing:.12em}
+.pulse{background:#7f1d1d;color:#fecaca;border:1px solid #ef4444;border-radius:999px;padding:2px 8px;font-size:9px;font-weight:800}
+.slipbtn{background:#111;color:#fff;border:1px solid #3b82f6;border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer}
+.searchbox{display:flex;background:#0c0c0c;border:1px solid #222;border-radius:8px;margin:8px 0}
+.searchbox input{flex:1;background:transparent;border:0;color:#fff;font-size:16px;padding:8px;outline:0}
+.searchbox button{background:#3b82f6;color:#fff;border:0;border-radius:6px;margin:6px;padding:7px 10px;font-weight:700}
+.chips,.maintabs{display:flex;overflow-x:auto}
+.mtab,.chip{background:transparent;border:0;border-bottom:2px solid transparent;color:#8b8b8b;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.mtab.on,.chip.on{color:#fff;border-bottom-color:#3b82f6}
+.note{color:#8b8b8b;font-size:12px}
+.bookbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+select{background:#0c0c0c;color:#fff;border:1px solid #2a2a2a;border-radius:999px;padding:7px 12px}
+.panel{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{position:sticky;top:0;background:#0a0a0a;color:#8b8b8b;font-size:10px;text-transform:uppercase;padding:6px 5px;text-align:left}
+td{padding:6px 5px;border-bottom:1px solid #141414;vertical-align:middle}
+.play{font-weight:700}.muted{color:#8b8b8b;font-size:11px}
+.A{color:#22c55e;font-weight:800}.B{color:#86efac;font-weight:800}.C{color:#eab308;font-weight:800}.D,.F{color:#ef4444;font-weight:800}
+.btn{background:#1f1f1f;color:#fff;border:1px solid #2a2a2a;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:700;cursor:pointer}
+.btn.sim{color:#86efac;border-color:#14532d}
+.act{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.act .ml{color:#86efac;font-size:11px;font-weight:800}
+.overlay{display:none;position:fixed;inset:0;background:#000c;z-index:30;padding:20px 10px;overflow:auto}
+.overlay.show{display:block}
+.modal-inner{max-width:860px;margin:0 auto;background:#0a0a0a;border:1px solid #222;border-radius:10px;padding:16px}
+.page{display:none}.page.on{display:block}
+.mapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.mapcard{background:#000;border:1px solid #222;border-radius:8px;padding:8px}
+.mapcard.likely{border-color:#22c55e}
+.kv{width:100%;margin:10px 0}
+.kv th{width:42%;color:#8b8b8b;font-size:11px;text-align:left;padding:6px 4px;background:transparent;position:static}
+.bump.up{display:inline-block;margin-left:4px;background:#7f1d1d;color:#fecaca;border-radius:999px;padding:1px 6px;font-size:9px;font-weight:800}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style></head>
 <body>
-<div class="refreshbar">LAST REFRESHED — Sep 17, 2026 11:20 PM CT</div>
-<p>Loading full board from data.js...</p>
+<div class="refreshbar">LAST REFRESHED — Sep 17, 2026 11:23 PM CT</div>
+<div class="top"><div class="top-inner">
+  <div class="brand"><h1>CS2 LABRATORY</h1><span class="pulse">updated every hour 2–11pm CT</span>
+    <button class="slipbtn" id="slipOpen">Generate slip</button></div>
+  <div class="maintabs">
+    <button class="mtab on" data-view="props">Props</button>
+    <button class="mtab" data-view="due">Due</button>
+    <button class="mtab" data-view="maps">Maps</button>
+  </div>
+  <form class="searchbox" id="form"><input id="q" placeholder="Search player or prop"/><button>Grade</button></form>
+  <div class="chips" id="chips"></div>
+</div></div>
+<div class="page on" id="home"><div class="wrap">
+  <div class="bookbar">
+    <span class="note">Sportsbook</span>
+    <select id="book"><option value="">All books</option><option value="PP">PrizePicks</option><option value="UD">Underdog</option><option value="Sleeper">Sleeper</option><option value="bovada">Bovada</option><option value="betr">Betr</option><option value="Chalkboard">Chalkboard</option></select>
+    <span class="note">Sort</span>
+    <select id="statSort"><option value="grade">Grade</option><option value="l5">Last 5</option><option value="l10">Last 10</option><option value="h2h">H2H</option></select>
+    <span class="note">View</span>
+    <select id="viewMode"><option value="row">Row</option><option value="col">Column</option><option value="grid">Grid</option></select>
+  </div>
+  <p class="note" id="status"></p>
+  <div class="panel" id="boardPanel"><table>
+    <thead><tr><th>#</th><th>Grade</th><th>Player</th><th>Line</th><th>L5</th><th>L10</th><th>L15</th><th>Avg</th><th>H2H</th><th>Proj</th><th>Books</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <div class="panel" id="mapsPanel" style="display:none"><table>
+    <thead><tr><th>Match</th><th>Map 1</th><th>Map 2</th><th>Top projected</th><th>Start</th></tr></thead>
+    <tbody id="mapRows"></tbody>
+  </table></div>
+</div></div>
+<div class="page" id="slipPage"><div class="wrap"><p class="note"><a href="#" id="backHome" style="color:#93c5fd">← Back</a></p>
+<div class="modal-inner"><h2>GENERATE SLIP</h2>
+<div class="bookbar">
+<select id="legs"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+<select id="slipBook"><option value="PP">PrizePicks (max 6)</option><option value="UD">Underdog (max 8)</option><option value="Sleeper">Sleeper (max 8)</option></select>
+<button class="btn" id="genBtn" style="background:#1d4ed8">Generate</button>
+</div><div id="slipOut"></div></div></div></div>
+<div class="overlay" id="overlay"><div class="modal-inner" id="modal"></div></div>
 <script src="data.js"></script>
 <script src="bumps.js"></script>
-<script>document.write('Props: '+(typeof ALL!=='undefined'?ALL.length:0));</script>
-</body>
-</html>
+<script>
+if(typeof ALL==="undefined") ALL=[];
+if(typeof MAPS==="undefined") MAPS={};
+var MOVES=window.__LINE_BUMPS||{};
+if(typeof REFRESH==="undefined") REFRESH=window.REFRESH||"";
+const VIEW={mode:"props"};
+function bookOf(){return document.getElementById("book").value||""}
+function bookOk(p){const b=bookOf();return !b||(p.books||"").split("/").some(x=>x.trim().toLowerCase()===b.toLowerCase())}
+function isHS(p){return /hs|head/i.test(p.prop||"")}
+function metricKey(p){return isHS(p)?"hs":"k"}
+function fmtStart(s){if(!s)return "";const d=new Date(s);if(isNaN(d))return s;return d.toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/Chicago"})+" CT"}
+function gauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function mapExpect(p){const ms=MAPS[p.player]||{}; const pool=(p.pool||[]).filter(m=>ms[m]); let names=pool.length?pool:Object.keys(ms).sort((a,b)=>(ms[b].n||0)-(ms[a].n||0)).slice(0,3); const key=metricKey(p); const vals=names.map(m=>ms[m]&&ms[m][key]).filter(v=>v!=null); if(!vals.length) return {val:p.avg||null,names}; if(p.maps12&&vals.length>=2) return {val:+(vals[0]+vals[1]).toFixed(1),names}; return {val:+vals[0].toFixed(1),names};}
+const PC={};
+function project(p){const id=[p.player,p.prop,p.line,p.match].join("|"); if(PC[id]) return PC[id]; const m=mapExpect(p); let mu=m.val; if(mu==null){const o={n:null,pOver:null,vs:null};PC[id]=o;return o} const nMaps=p.maps12?2:1, per=nMaps===2?mu/2:mu; const sd=Math.max(isHS(p)?2.2:3.2, per*0.28); const mul=p.ml>=70?0.94:p.ml>=55?0.98:p.ml<=40?1.06:1; const N=2000, totals=[], maps=(m.names||[]).slice(0,nMaps); for(let t=0;t<N;t++){let tot=0; for(let k=0;k<nMaps;k++){const name=maps[k]; let x=per; if(name&&MAPS[p.player]&&MAPS[p.player][name]) x=MAPS[p.player][name][metricKey(p)]; tot+=Math.max(0,(x*mul)+sd*gauss());} totals.push(tot);} totals.sort((a,b)=>a-b); const median=+totals[N/2|0].toFixed(1); const pOver=+(100*totals.filter(x=>x>p.line).length/N).toFixed(1); const o={n:median,pOver,vs:+(median-p.line).toFixed(1)}; PC[id]=o; return o;}
+function factorScores(p){const pr=project(p); const parts=[Math.max(0,Math.min(100,p.ml||0)), pr.n==null?null:Math.max(0,Math.min(100,50+(pr.n-p.line)*12.5)), (p.h2hGames||0)>0?p.h2h:null, p.l5, p.l10, p.l15].filter(v=>v!=null); const avg=parts.length?parts.reduce((a,b)=>a+b,0)/parts.length:0; p.grade=avg>=72?"A":avg>=62?"B":avg>=52?"C":avg>=42?"D":"F"; p.score=+avg.toFixed(1); return p.score;}
+function rankScore(p){factorScores(p);return (4-"ABCDF".indexOf(p.grade))*1000+(p.score||0)}
+function uniqueBest(list){const by={}; list.forEach(p=>{const k=p.player+"|"+p.prop+"|"+p.match; const cur=by[k]; if(!cur||(p.books||"").length>(cur.books||"").length) by[k]=p;}); return Object.values(by);}
+function sortList(list){const k=document.getElementById("statSort").value; const arr=list.slice(); if(k==="l5"||k==="l10") return arr.sort((a,b)=>(b[k]||-1)-(a[k]||-1)); if(k==="h2h") return arr.sort((a,b)=>((b.h2hGames?b.h2h:-1)-(a.h2hGames?a.h2h:-1))); return arr.sort((a,b)=>rankScore(b)-rankScore(a));}
+function isDue(p){const pr=project(p); if(!p.miss||pr.pOver==null||pr.pOver<55) return false; return ((p.h2hGames||0)>0&&p.h2h>=50)||((p.h2hGames||0)===0&&(p.ml||0)>50)}
+function mapCards(p){const ms=MAPS[p.player]||{}, likely=new Set(p.pool||[]); const names=Object.keys(ms).sort((a,b)=>(likely.has(b)-likely.has(a))||(ms[b].n||0)-(ms[a].n||0)); const key=metricKey(p), lab=isHS(p)?"avg HS":"avg kills"; return '<div class="mapgrid">'+names.map(m=>{const x=ms[m];return `<div class="mapcard ${likely.has(m)?"likely":""}"><b>${m}</b><br>${lab} ${x[key]} · rtg ${x.r} · ${x.n} maps</div>`}).join("")+"</div>";}
+function statsTable(p,pr){const rows=[["Grade",p.grade],["Line",p.line],["Projected",pr.n??"n/a"],["P(over)",(pr.pOver??"n/a")+"%"],["Team ML",p.ml+"%"],["Last 5",p.l5==null?"n/a":p.l5+"%"],["Last 10",p.l10==null?"n/a":p.l10+"%"],["Last 15",p.l15==null?"n/a":p.l15+"%"],["L10 avg",p.avg??"n/a"],["H2H",(p.h2hGames||0)?p.h2h+"% ("+p.h2hHits+"/"+p.h2hGames+")":"n/a"],["Last match",p.last],["Start",fmtStart(p.start)],["Books",p.books||"—"],["Likely maps",(p.pool||[]).slice(0,2).join(" + ")||"n/a"]]; return `<table class="kv"><tbody>${rows.map(([k,v])=>`<tr><th>${k}</th><td>${v}</td></tr>`).join("")}</tbody></table>`;}
+function bumpOf(p){const k=[p.player,p.prop,p.match].join("|"); if(MOVES[k]) return MOVES[k]; const parts=(p.match||"").split(" vs "); if(parts.length===2){const k2=[p.player,p.prop,parts[1]+" vs "+parts[0]].join("|"); if(MOVES[k2]) return MOVES[k2];} return null;}
+function bumpBadge(p){const b=bumpOf(p); if(!b) return ""; if(b.new>b.old) return `<span class="bump up">BUMPED ${b.old}→${b.new}</span>`; return `<span class="bump up" style="background:#14532d;color:#bbf7d0">CUT ${b.old}→${b.new}</span>`;}
+function render(list){window.CURRENT=list; document.getElementById("rows").innerHTML=list.map((p,i)=>{const pr=project(p); factorScores(p); return `<tr><td>${i+1}</td><td class="${p.grade}">${p.grade}</td><td class="play">${p.player}<div class="muted">${p.match} · ${p.prop}</div></td><td>${p.line}${bumpBadge(p)}</td><td>${p.l5==null?"n/a":p.l5+"%"}</td><td>${p.l10==null?"n/a":p.l10+"%"}</td><td>${p.l15==null?"n/a":p.l15+"%"}</td><td>${p.avg??"n/a"}</td><td>${p.h2hGames?p.h2h+"%":"n/a"}</td><td><b>${pr.n??"n/a"}</b></td><td>${p.books||"—"}</td><td><div class="act"><button class="btn" data-act="sum" data-i="${i}">Summary</button><button class="btn sim" data-act="sim" data-i="${i}">Simulation</button><span class="muted">${fmtStart(p.start)}</span><span class="ml">${p.ml}% win</span></div></td></tr>`;}).join("")||`<tr><td colspan="12" class="muted">No rows</td></tr>`;}
+function renderMaps(){const by={}; ALL.filter(bookOk).forEach(p=>{const k=p.match||"?"; if(!by[k]) by[k]={match:k,start:p.start,pool:p.pool||[],players:[]}; by[k].players.push(p); (p.pool||[]).forEach(m=>{if(!by[k].pool.includes(m)) by[k].pool.push(m)});}); document.getElementById("mapRows").innerHTML=Object.values(by).sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(m=>{const tops=m.players.map(p=>({p,pr:project(p)})).sort((a,b)=>(b.pr.pOver||0)-(a.pr.pOver||0)).slice(0,3).map(x=>x.p.player+" "+x.p.prop+" ("+(x.pr.pOver??"—")+"%)").join(" · "); return `<tr><td class="play">${m.match}</td><td>${m.pool[0]||"TBD"}</td><td>${m.pool[1]||"TBD"}</td><td class="muted">${tops||"—"}</td><td>${fmtStart(m.start)}</td></tr>`;}).join("");}
+function search(q){q=(q||"").trim(); const status=document.getElementById("status"); if(VIEW.mode==="maps"){status.textContent="Maps grouped from current lines";renderMaps();return} let list=ALL.filter(bookOk); if(VIEW.mode==="due"||q.toLowerCase()==="due"){ list=sortList(list.filter(isDue)); status.textContent=list.length+" due · missed last · H2H≥50% or favorite"; render(list); return; } const CATS=["Maps 1-2 Kills","Maps 1-2 HS","Map 1 Kills","Map 1 HS","Map 2 Kills"]; const cat=CATS.find(c=>c.toLowerCase()===q.toLowerCase()); if(q.toLowerCase()==="discrepancies") list=list.filter(p=>project(p).vs>0); else if(q.toLowerCase()==="bumps") list=list.filter(bumpOf); else if(q.toLowerCase()==="unders") list=list.filter(p=>project(p).vs<=-1.2); else if(cat) list=list.filter(p=>p.prop===cat); else if(q&&q.toLowerCase()!=="all") list=list.filter(p=>[p.player,p.team,p.opp,p.match,p.prop,p.books].join(" ").toLowerCase().includes(q.toLowerCase())); list=sortList(uniqueBest(list)); status.textContent=list.length+" unique lines · "+ALL.length+" raw book rows · "+REFRESH; render(list);}
+function openSummary(i){const p=window.CURRENT[i], pr=project(p); document.getElementById("overlay").className="overlay show"; document.getElementById("modal").innerHTML=`<button class="btn" id="x">Close</button><div class="${p.grade}" style="font-size:42px">${p.grade}</div><div><b>${p.player}</b> ${p.prop} ${p.line}<div class="muted">${p.match} · ${fmtStart(p.start)}</div></div>${statsTable(p,pr)}${mapCards(p)}`; document.getElementById("x").onclick=()=>document.getElementById("overlay").className="overlay";}
+function runSim1000(p){const m=mapExpect(p); const names=(m.names||[]).slice(0,2); const key=metricKey(p); const ms=MAPS[p.player]||{}; const mu=names.reduce((a,n)=>a+((ms[n]&&ms[n][key])||0),0)||m.val||p.avg||p.line; const per=names.length?mu/Math.max(1,names.length):mu; const sd=Math.max(isHS(p)?2:3, per*0.28); let tot=0; for(let i=0;i<1000;i++){let s=0; for(let k=0;k<Math.max(1,names.length||2);k++){const nm=names[k]; let x=per; if(nm&&ms[nm]) x=ms[nm][key]; s+=Math.max(0,x+sd*gauss());} tot+=s;} return {val:Math.round(tot/1000), maps:names.join(" + ")||"top maps", mu:+(+mu).toFixed(1)};}
+function openSim(i){const p=window.CURRENT[i]; document.getElementById("overlay").className="overlay show"; document.getElementById("modal").innerHTML=`<button class="btn" id="x">Close</button><div><b>${p.player}</b> simulation</div><div class="muted">${p.prop} line ${p.line} · ${fmtStart(p.start)}</div><div id="spin" style="margin:28px auto;width:56px;height:56px;border:4px solid #222;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite"></div><p class="muted">Running 1,000 sims on the top maps…</p>`; document.getElementById("x").onclick=()=>document.getElementById("overlay").className="overlay"; setTimeout(()=>{const r=runSim1000(p); const hit=r.val>p.line?"OVER":r.val<p.line?"UNDER":"PUSH"; document.getElementById("modal").innerHTML=`<button class="btn" id="x">Close</button><div><b>${p.player}</b> simulation</div><div class="muted">1,000 trials · ${r.maps}</div><div style="font-size:56px;font-weight:800;margin:12px 0">${r.val}</div><div class="${hit==="OVER"?"A":hit==="UNDER"?"F":"C"}">${hit} vs ${p.line}</div><p class="muted">Map mean ${r.mu}.</p>`; document.getElementById("x").onclick=()=>document.getElementById("overlay").className="overlay";},5000);}
+function showPage(id){document.querySelectorAll(".page").forEach(x=>x.classList.remove("on")); document.getElementById(id).classList.add("on")}
+document.getElementById("rows").onclick=e=>{const b=e.target.closest(".btn"); if(!b) return; if(b.dataset.act==="sim") openSim(+b.dataset.i); else openSummary(+b.dataset.i);};
+document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay") e.target.className="overlay"};
+document.getElementById("form").onsubmit=e=>{e.preventDefault();search(document.getElementById("q").value)};
+document.getElementById("q").oninput=e=>search(e.target.value);
+document.getElementById("book").onchange=()=>search(document.getElementById("q").value);
+document.getElementById("statSort").onchange=()=>search(document.getElementById("q").value);
+document.getElementById("slipOpen").onclick=()=>showPage("slipPage");
+document.getElementById("backHome").onclick=e=>{e.preventDefault();showPage("home")};
+document.getElementById("genBtn").onclick=()=>{const n=+document.getElementById("legs").value, book=document.getElementById("slipBook").value; const pool=ALL.filter(p=>(p.books||"").split("/").includes(book)).map(p=>({p,pr:project(p)})).filter(x=>(x.pr.pOver||0)>=55).sort((a,b)=>b.pr.pOver-a.pr.pOver); const used=new Set(), pick=[]; for(const x of pool){ if(pick.length>=n) break; if(used.has(x.p.player)) continue; pick.push(x); used.add(x.p.player);} document.getElementById("slipOut").innerHTML=pick.map((x,i)=>`<p><b>${i+1}. ${x.p.player}</b> ${x.p.prop} ${x.p.line} · P(over) ${x.pr.pOver}%</p>`).join("")||"Not enough legs on that book.";};
+document.querySelectorAll(".mtab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".mtab").forEach(x=>x.classList.remove("on")); t.classList.add("on"); VIEW.mode=t.dataset.view; document.getElementById("mapsPanel").style.display=VIEW.mode==="maps"?"block":"none"; document.getElementById("boardPanel").style.display=VIEW.mode==="maps"?"none":"block"; if(VIEW.mode==="due") document.getElementById("q").value="Due"; search(document.getElementById("q").value);});
+["All","Maps 1-2 Kills","Maps 1-2 HS","Bumps","Discrepancies","Due","Unders"].forEach(c=>{const b=document.createElement("button"); b.type="button"; b.className="chip"+(c==="Maps 1-2 Kills"?" on":""); b.textContent=c; b.onclick=()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on")); b.classList.add("on"); document.getElementById("q").value=c==="All"?"":c; VIEW.mode=c==="Due"?"due":"props"; search(c);}; document.getElementById("chips").appendChild(b);});
+document.getElementById("q").value="Maps 1-2 Kills"; search("Maps 1-2 Kills");
+</script></body></html>
