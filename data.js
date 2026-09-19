@@ -1,2 +1,2 @@
-var ALL=[{"player":"Grim","team":"NRG","opp":"MIBR","match":"NRG vs MIBR","tourney":"StarLadder StarSeries","start":"2026-09-19T17:00:00Z","prop":"Maps 1-2 Kills","line":28.5,"avg":33.7,"l5":80,"l10":90,"l15":66.7,"streak":1,"h2h":100,"h2hHits":2,"h2hGames":2,"last":"vs Aurora","miss":false,"ml":37,"books":"betr","maps12":true,"pp":false,"ud":false,"grade":"B","pool":[],"hltv":true}];
-var REFRESH="Sep 18, 2026 6:18 PM CT";
+var ALL=[];
+var REFRESH="Sep 18, 2026 7:05 PM CT";
